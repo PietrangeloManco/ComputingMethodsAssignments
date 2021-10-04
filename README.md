@@ -1,2 +1,2 @@
-# MyFirstRepository
-Test repository for the CMEPDA
+# ComputingMethodsAssignments
+Repository for the Computing Methods course.
