@@ -2,59 +2,94 @@
 from collections import Counter
 from timeit import default_timer as timer
 import os
-from matplotlib import pyplot
+from matplotlib import pyplot as plt
 import pandas
 
 def start():
     """--help option function."""
-    print('type "--help" for instructions, "run" to execute the script.')
+    print('\nType "--help" for instructions, "run" to execute the script.\n')
     choice = input()
     if choice == '--help':
-        print('Insert a txt file path to get the letters occurences.')
-        characters_counter()
-        return
+        print('\nInsert a txt file path to get the letters occurences.\n')
+        return 'ok'
     if choice == 'run':
-        characters_counter()
-        return
-    print('Invalid choice. Try again.\n')
-    start()
-    return
+        return 'ok'
+    print('\nInvalid choice. Try again.\n')
+    return 'ohno'
 
 def check(path):
     """Checking the input file's validity."""
     if os.path.exists(path) and path.endswith('.txt'):
         return 'nice'
-    print('Bad or non existing file. Try again.\n')
-    characters_counter()
+    print('\nBad or nonexisting file. Try again.\n')
     return 'abort'
 
-def characters_counter():
+def characters_counter(bookpath):
     """Actual counter of occurrences."""
-    print('Insert your files path:\n')
-    book_path = (input())
-    if check(book_path) == 'abort':
-        return
-    with open(book_path) as book:
-        letters_list = [ch.lower() for ch in book.read() if ch.isalpha()]
+    letters_list = book_creation(bookpath)
     counter = Counter(letters_list)
     occurrences_sum = sum(counter.values())
     occurrences_dict = sorted(counter.items())
     for key, value in occurrences_dict:
         print(f'{key} : {value*100/occurrences_sum:.4f} % ({value} occurrences)')
-    histogram(occurrences_dict)
-    return
+    return occurrences_dict
 
 def histogram(occ):
     """Making an histogram of the occurrences."""
-    print('Do you want to see the occurrences histogram? (type y for yes, anything else for no.)\n')
+    print('\nDo you want to see the occurrences histogram? (y for yes, anything else for no.)\n')
     if input() == 'y':
         hist = pandas.DataFrame(occ, columns = ['letter', 'frequency'])
         hist.plot(kind = 'bar', x = 'letter')
-        pyplot.show()
+        plt.show()
         return
     return
 
+def book_lenght(text):
+    """Asking the user if he wants to skip some pages."""
+    print('\nDo you want to skip some lines? Type "y" for yes, anything else for no.\n')
+    if input() == 'y':
+        print('\nWhich line should I start with?\n')
+        while True:
+            try:
+                init = int(input())
+                break
+            except ValueError:
+                print('\nInvalid choice. Try again.\n')
+        if 0 < init < len(text):
+            print('\nWhich line shoud I stop with?\n')
+            while True:
+                try:
+                    last = int(input())
+                    break
+                except ValueError:
+                    print('\nInvalid choice. Try again.\n')
+            if last > 0 and init < last < len(text):
+                effective_text = text[init:last]
+                return effective_text
+    return text
+
+def book_creation(bpath):
+    """Takes a book and does stuff with it."""
+    with open(bpath) as book:
+        book_lines = book.readlines()
+        effective_book_lines = book_lenght(book_lines)
+    with open('New_book.txt', 'w') as effective_book_w:
+        for item in effective_book_lines:
+            effective_book_w.write('%s\n' % item)
+    with open('New_book.txt', 'r') as  effective_book_r:
+        ext_letters_list = [ch.lower() for ch in effective_book_r.read() if ch.isalpha()]
+    return ext_letters_list
+
 time_0 = timer()
-start()
+while True:
+    if start() == 'ok':
+        break
+print('\nInsert your files path:\n')
+while True:
+    book_path = (input())
+    if check(book_path) == 'nice':
+        break
+oc_dict = characters_counter(book_path)
+histogram(oc_dict)
 time_1 = timer()
-print(f'\nTotal elapsed time: {(time_1-time_0): .4f} s')
+print(f'\nTotal elapsed time: {(time_1-time_0): .4f} s\n')
