@@ -2,6 +2,8 @@
 from collections import Counter
 from timeit import default_timer as timer
 import os
+from matplotlib import pyplot
+import pandas
 
 def start():
     """--help option function."""
@@ -34,10 +36,22 @@ def characters_counter():
         return
     with open(book_path) as book:
         letters_list = [ch.lower() for ch in book.read() if ch.isalpha()]
-    occurrences_sum = sum(Counter(letters_list).values())
-    occurrences_dict = sorted(Counter(letters_list).items())
+    counter = Counter(letters_list)
+    occurrences_sum = sum(counter.values())
+    occurrences_dict = sorted(counter.items())
     for key, value in occurrences_dict:
         print(f'{key} : {value*100/occurrences_sum:.4f} % ({value} occurrences)')
+    histogram(occurrences_dict)
+    return
+
+def histogram(occ):
+    """Making an histogram of the occurrences."""
+    print('Do you want to see the occurrences histogram? (type y for yes, anything else for no.)\n')
+    if input() == 'y':
+        hist = pandas.DataFrame(occ, columns = ['letter', 'frequency'])
+        hist.plot(kind = 'bar', x = 'letter')
+        pyplot.show()
+        return
     return
 
 time_0 = timer()
